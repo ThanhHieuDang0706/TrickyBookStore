@@ -4,7 +4,7 @@ using TrickyBookStore.Models;
 
 namespace TrickyBookStore.Services.Store
 {
-    public static class PurchaseTransactionService
+    public static class PurchaseTransactionStore
     {
         public static readonly IEnumerable<PurchaseTransaction> Data = new List<PurchaseTransaction>
         {
