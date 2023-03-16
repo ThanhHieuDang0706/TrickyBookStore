@@ -69,8 +69,10 @@
       <Name>TrickyBookStore.Models</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Resource\" />
+    <None Include="Resource\2_CleanCodeRef_Assignment_trainees.docx" />
+    <None Include="Resource\3_Cleancsharp.pdf" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
