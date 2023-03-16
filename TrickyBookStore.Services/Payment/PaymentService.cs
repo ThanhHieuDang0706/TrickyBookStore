@@ -6,7 +6,7 @@ using TrickyBookStore.Services.PurchaseTransactions;
 
 namespace TrickyBookStore.Services.Payment
 {
-    internal class PaymentService : IPaymentService
+    public class PaymentService : IPaymentService
     {
         ICustomerService CustomerService { get; }
         IPurchaseTransactionService PurchaseTransactionService { get; }
