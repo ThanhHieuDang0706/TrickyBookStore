@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using TrickyBookStore.Models;
 using TrickyBookStore.Services.Books;
 using TrickyBookStore.Services.Customers;
@@ -13,7 +14,13 @@ namespace TrickyBookStore.Services.Payment
         private ICustomerService CustomerService { get; }
         private IPurchaseTransactionService PurchaseTransactionService { get; }
 
-        public PaymentService(ICustomerService customerService, 
+        struct GroupedTransactionsById
+        {
+            public long CustomerId;
+            public List<PurchaseTransaction> Transactions;
+        }
+
+        public PaymentService(ICustomerService customerService,
             IPurchaseTransactionService purchaseTransactionService)
         {
             CustomerService = customerService;
@@ -25,7 +32,26 @@ namespace TrickyBookStore.Services.Payment
             IList<PurchaseTransaction> purchaseTransactions =
                 PurchaseTransactionService.GetPurchaseTransactions(customerId, fromDate, toDate);
 
-            throw new NotImplementedException();
+            // group by customer id and map it to the transactions related to the customer id
+            var groupedPurchaseTransactions = purchaseTransactions.GroupBy(
+                               transaction => transaction.CustomerId,
+                                              transaction => transaction,
+                                              (key, transactions) => new GroupedTransactionsById() { CustomerId = key, Transactions = transactions.ToList() }).ToList();
+
+            double totalPayment = groupedPurchaseTransactions.Aggregate(0d, CalculatePaymentOfGroupedTransactions);
+            return totalPayment;
+        }
+
+        private double CalculatePaymentOfGroupedTransactions(double total, GroupedTransactionsById currentGroupedTransaction)
+        {
+            double paymentAmount = 0;
+            long customerId = currentGroupedTransaction.CustomerId;
+
+            foreach (var purchaseTransaction in currentGroupedTransaction.Transactions)
+            {
+
+            }
+            return total + paymentAmount;
         }
     }
 }

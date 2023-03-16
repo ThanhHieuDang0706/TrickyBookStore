@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Linq;
 using TrickyBookStore.Models;
+using TrickyBookStore.Services.Store;
 using TrickyBookStore.Services.Subscriptions;
 
 namespace TrickyBookStore.Services.Customers
 {
     public class CustomerService : ICustomerService
     {
-        ISubscriptionService SubscriptionService { get; }
+        private ISubscriptionService SubscriptionService { get; }
 
         public CustomerService(ISubscriptionService subscriptionService)
         {
@@ -17,6 +18,10 @@ namespace TrickyBookStore.Services.Customers
         public Customer GetCustomerById(long id)
         {
             Customer targetCustomer = Store.Customers.Data.FirstOrDefault(customer => customer.Id == id);
+            if (targetCustomer == null)
+            {
+                throw new ArgumentException($"Customer with id {id} not found");
+            }
             return targetCustomer;
         }
     }
