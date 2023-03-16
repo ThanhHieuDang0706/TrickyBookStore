@@ -19,40 +19,40 @@ namespace TrickyBookStore.Services.Store
 
                 }
             },
-            new Subscription { Id = 3, SubscriptionType = SubscriptionTypes.Premium, Priority = 3,
+            new Subscription { Id = 3, SubscriptionType = SubscriptionTypes.Premium, Priority = 4,
                 PriceDetails = new Dictionary<string, double>
                 {
                    
                 }
             },
-            new Subscription { Id = 4, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 4,
+            new Subscription { Id = 4, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 3,
                 PriceDetails = new Dictionary<string, double>
                 {
                     
                 }              
             },
-            new Subscription { Id = 5, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 4,
+            new Subscription { Id = 5, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 3,
                 PriceDetails = new Dictionary<string, double>
                 {
                     { "Discount", 0.75 },
                 },
                 BookCategoryId = 1
             },
-            new Subscription { Id = 6, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 4,
+            new Subscription { Id = 6, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 3,
                 PriceDetails = new Dictionary<string, double>
                 {
                     { "Discount", 0.75 }
                 },
                 BookCategoryId = 3
             },
-            new Subscription { Id = 7, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 4,
+            new Subscription { Id = 7, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 3,
                 PriceDetails = new Dictionary<string, double>
                 {
                     { "Discount", 0.75 }
                 },
                 BookCategoryId = 2
             },
-            new Subscription { Id = 7, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 4,
+            new Subscription { Id = 7, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 3,
                 PriceDetails = new Dictionary<string, double>
                 {
                     { "Discount", 0.75 }

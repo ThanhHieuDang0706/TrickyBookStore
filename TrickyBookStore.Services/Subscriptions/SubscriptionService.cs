@@ -20,18 +20,5 @@ namespace TrickyBookStore.Services.Subscriptions
             List<Subscription> subscriptions = Store.Subscriptions.Data.Where(subscription => ids.Contains(subscription.Id)).ToList();
             return subscriptions;
         }
-
-        public IList<Subscription> GetSubscriptionsByCustomerId(long customerId)
-        {
-            Customer targetCustomer = CustomerService.GetCustomerById(customerId);
-            
-            if (targetCustomer == null)
-            {
-                throw new ArgumentException($"Customer with id {customerId} not found");
-            }
-
-            IList<Subscription> subscriptions = GetSubscriptions(targetCustomer.SubscriptionIds.ToArray());
-            return subscriptions;
-        }
     }
 }

@@ -6,12 +6,14 @@ using TrickyBookStore.Models;
 using TrickyBookStore.Services.Books;
 using TrickyBookStore.Services.Customers;
 using TrickyBookStore.Services.PurchaseTransactions;
+using TrickyBookStore.Services.Subscriptions;
 
 namespace TrickyBookStore.Services.Payment
 {
     public class PaymentService : IPaymentService
     {
         private ICustomerService CustomerService { get; }
+        private ISubscriptionService SubscriptionService { get; }
         private IPurchaseTransactionService PurchaseTransactionService { get; }
 
         struct GroupedTransactionsById
@@ -20,14 +22,14 @@ namespace TrickyBookStore.Services.Payment
             public List<PurchaseTransaction> Transactions;
         }
 
-        public PaymentService(ICustomerService customerService,
-            IPurchaseTransactionService purchaseTransactionService)
+        public PaymentService(ICustomerService customerService, IPurchaseTransactionService purchaseTransactionService, ISubscriptionService subscriptionService)
         {
             CustomerService = customerService;
+            SubscriptionService = subscriptionService;
             PurchaseTransactionService = purchaseTransactionService;
         }
 
-        public double GetPaymentAmount(long customerId, DateTimeOffset fromDate, DateTimeOffset toDate)
+        public double GetPaymentAmountOfPurchaseTransactions(long customerId, DateTimeOffset fromDate, DateTimeOffset toDate)
         {
             IList<PurchaseTransaction> purchaseTransactions =
                 PurchaseTransactionService.GetPurchaseTransactions(customerId, fromDate, toDate);
@@ -46,10 +48,12 @@ namespace TrickyBookStore.Services.Payment
         {
             double paymentAmount = 0;
             long customerId = currentGroupedTransaction.CustomerId;
+            Customer customer = CustomerService.GetCustomerById(customerId);
+
 
             foreach (var purchaseTransaction in currentGroupedTransaction.Transactions)
             {
-
+                // go through each transaction, check if it is a subscription or a book purchase
             }
             return total + paymentAmount;
         }
