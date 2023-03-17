@@ -71,7 +71,6 @@ namespace TrickyBookStore.Services.Store
             new PurchaseTransaction { Id = 61, CustomerId = 6, BookId = 16, CreatedDate = new DateTimeOffset(new DateTime(2018, 2, 28)) },
             new PurchaseTransaction { Id = 62, CustomerId = 6, BookId = 17, CreatedDate = new DateTimeOffset(new DateTime(2018, 2, 12)) },
             new PurchaseTransaction { Id = 63, CustomerId = 6, BookId = 18, CreatedDate = new DateTimeOffset(new DateTime(2018, 2, 14)) },
-
             new PurchaseTransaction { Id = 64, CustomerId = 5, BookId = 1, CreatedDate = new DateTimeOffset(new DateTime(2018, 3, 2)) },
             new PurchaseTransaction { Id = 65, CustomerId = 5, BookId = 2, CreatedDate = new DateTimeOffset(new DateTime(2018, 3, 10)) },
             new PurchaseTransaction { Id = 66, CustomerId = 5, BookId = 3, CreatedDate = new DateTimeOffset(new DateTime(2018, 3, 20)) },
