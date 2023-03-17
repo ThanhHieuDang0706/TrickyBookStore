@@ -25,7 +25,7 @@ namespace ProgramEntry
                     Console.Write("Customer ID: ");
                     long customerId = long.Parse(Console.ReadLine());
 
-                    Console.WriteLine(_paymentService.GetPaymentAmountOfPurchaseTransactions(customerId, 
+                    Console.WriteLine($"Total payment of customer {customerId}: " + _paymentService.GetPaymentAmountOfPurchaseTransactions(customerId, 
                         new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero), 
                         new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero).AddMonths(1)));
                 }
