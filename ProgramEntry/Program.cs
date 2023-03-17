@@ -8,12 +8,12 @@ using TrickyBookStore.Services.Subscriptions;
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
+        services.AddSingleton<ICustomerService, CustomerService>();
+        services.AddSingleton<ISubscriptionService, SubscriptionService>();
+        services.AddSingleton<IPurchaseTransactionService, PurchaseTransactionService>();
+        services.AddSingleton<IBookService, BookService>();
+        services.AddSingleton<IPaymentService, PaymentService>();
         services.AddHostedService<Worker>();
-        services.AddScoped<ICustomerService, CustomerService>();
-        services.AddScoped<ISubscriptionService, SubscriptionService>();
-        services.AddScoped<IPurchaseTransactionService, PurchaseTransactionService>();
-        services.AddScoped<IBookService, BookService>();
-        services.AddScoped<IPaymentService, PaymentService>();
     })
     .Build();
 

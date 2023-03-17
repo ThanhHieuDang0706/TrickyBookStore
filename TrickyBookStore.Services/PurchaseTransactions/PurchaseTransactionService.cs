@@ -8,11 +8,9 @@ namespace TrickyBookStore.Services.PurchaseTransactions
 {
     public class PurchaseTransactionService : IPurchaseTransactionService
     {
-        IBookService BookService { get; }
-
-        public PurchaseTransactionService(IBookService bookService)
+        public PurchaseTransactionService()
         {
-            BookService = bookService;
+         
         }
 
         public IList<PurchaseTransaction> GetPurchaseTransactions(long customerId, DateTimeOffset fromDate, DateTimeOffset toDate)

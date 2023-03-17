@@ -8,6 +8,6 @@ namespace TrickyBookStore.Services.Payment
     public interface IPaymentService
     {
         
-        double GetPaymentAmount(long customerId, DateTimeOffset fromDate, DateTimeOffset toDate);
+        double GetPaymentAmountOfPurchaseTransactions(long customerId, DateTimeOffset fromDate, DateTimeOffset toDate);
     }
 }

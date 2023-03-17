@@ -14,19 +14,15 @@ namespace TrickyBookStore.Services.Payment
     {
         private ICustomerService CustomerService { get; }
         private ISubscriptionService SubscriptionService { get; }
+        private IBookService BookService { get; }
         private IPurchaseTransactionService PurchaseTransactionService { get; }
 
-        struct GroupedTransactionsById
-        {
-            public long CustomerId;
-            public List<PurchaseTransaction> Transactions;
-        }
-
-        public PaymentService(ICustomerService customerService, IPurchaseTransactionService purchaseTransactionService, ISubscriptionService subscriptionService)
+        public PaymentService(ICustomerService customerService, IPurchaseTransactionService purchaseTransactionService, ISubscriptionService subscriptionService, IBookService bookService)
         {
             CustomerService = customerService;
             SubscriptionService = subscriptionService;
             PurchaseTransactionService = purchaseTransactionService;
+            BookService = bookService;
         }
 
         public double GetPaymentAmountOfPurchaseTransactions(long customerId, DateTimeOffset fromDate, DateTimeOffset toDate)
@@ -34,28 +30,93 @@ namespace TrickyBookStore.Services.Payment
             IList<PurchaseTransaction> purchaseTransactions =
                 PurchaseTransactionService.GetPurchaseTransactions(customerId, fromDate, toDate);
 
-            // group by customer id and map it to the transactions related to the customer id
-            var groupedPurchaseTransactions = purchaseTransactions.GroupBy(
-                               transaction => transaction.CustomerId,
-                                              transaction => transaction,
-                                              (key, transactions) => new GroupedTransactionsById() { CustomerId = key, Transactions = transactions.ToList() }).ToList();
-
-            double totalPayment = groupedPurchaseTransactions.Aggregate(0d, CalculatePaymentOfGroupedTransactions);
-            return totalPayment;
-        }
-
-        private double CalculatePaymentOfGroupedTransactions(double total, GroupedTransactionsById currentGroupedTransaction)
-        {
-            double paymentAmount = 0;
-            long customerId = currentGroupedTransaction.CustomerId;
             Customer customer = CustomerService.GetCustomerById(customerId);
 
+            IList<Book> books = BookService.GetBooks(purchaseTransactions.Select(transaction => transaction.BookId).ToArray());
 
-            foreach (var purchaseTransaction in currentGroupedTransaction.Transactions)
+            IList<Subscription> subscriptions = SubscriptionService.GetSubscriptions(customer.SubscriptionIds.ToArray());
+            Dictionary<int, int> usedDiscountCount = new Dictionary<int, int>();
+
+            foreach (var subscription in subscriptions)
             {
-                // go through each transaction, check if it is a subscription or a book purchase
+                usedDiscountCount.Add(subscription.Id, 0);
             }
-            return total + paymentAmount;
+
+            var categorySubscriptions = subscriptions
+                .Where(subscription => subscription.SubscriptionType == SubscriptionTypes.CategoryAddicted)
+                .ToLookup(s => s.BookCategoryId, s => s);
+            var premiumSubscription = subscriptions.FirstOrDefault(subscription => subscription.SubscriptionType == SubscriptionTypes.Premium);
+            var paidSubscription = subscriptions.FirstOrDefault(subscription => subscription.SubscriptionType == SubscriptionTypes.Paid);
+            var freeSubscription = SubscriptionService.GetFreeSubscription();
+
+            double totalPayment = 0d;
+            foreach (var book in books)
+            {
+                if (book.IsOld)
+                {
+                    if (!categorySubscriptions.Contains(book.CategoryId) || premiumSubscription == null)
+                    {
+                        if (paidSubscription != null)
+                        {
+                            totalPayment += book.Price * paidSubscription.PriceDetails["DiscountOldBook"];
+                        }
+                        else
+                        {
+                            totalPayment += book.Price * freeSubscription.PriceDetails["DiscountOldBook"];
+                        }
+                    }
+                }
+                else
+                {
+                    Subscription subscription =
+                        SelectAvailableSubscriptionForNewBook(subscriptions, categorySubscriptions, book, usedDiscountCount);
+                    if (subscription.SubscriptionType == SubscriptionTypes.Free)
+                    {
+                        totalPayment += book.Price * subscription.PriceDetails["DiscountNewBook"];
+                    }
+                    else
+                    {
+                        totalPayment += book.Price * subscription.PriceDetails["DiscountNewBook"];
+                        usedDiscountCount[subscription.Id]++;
+                    }
+                }
+            }
+            double subscriptionFees = subscriptions.Sum(subscription => subscription.Fee);
+            return totalPayment + subscriptionFees;
         }
+
+        private Subscription SelectAvailableSubscriptionForNewBook(IList<Subscription> subscriptions, ILookup<int?, Subscription> categorySubscriptionLookup, Book book,
+            Dictionary<int, int> usedDiscountCount)
+        {
+            if (categorySubscriptionLookup.Contains(book.CategoryId))
+            {
+                Subscription subscription = categorySubscriptionLookup[book.CategoryId].First();
+                if (subscription.NumOfNewBookDiscount > usedDiscountCount[subscription.Id])
+                {
+                    return subscription;
+                }
+            }
+
+            if (subscriptions.Any(subscription => subscription.SubscriptionType == SubscriptionTypes.Premium))
+            {
+                Subscription premiumSubscription = subscriptions.First(subscription => subscription.SubscriptionType == SubscriptionTypes.Premium);
+                if (premiumSubscription.NumOfNewBookDiscount > usedDiscountCount[premiumSubscription.Id])
+                {
+                    return premiumSubscription;
+                }
+            }
+
+            if (subscriptions.Any(subscription => subscription.SubscriptionType == SubscriptionTypes.Paid))
+            {
+                Subscription paidSubscription = subscriptions.First(subscription => subscription.SubscriptionType == SubscriptionTypes.Paid);
+                if (paidSubscription.NumOfNewBookDiscount > usedDiscountCount[paidSubscription.Id])
+                {
+                    return paidSubscription;
+                }
+            }
+
+            return SubscriptionService.GetFreeSubscription();
+        }
+
     }
 }

@@ -18,18 +18,20 @@ namespace ProgramEntry
             {
                 try
                 {
-                    Console.WriteLine("Year: ");
+                    Console.Write("Year: ");
                     int year = int.Parse(Console.ReadLine());
-                    Console.WriteLine("Month: ");
+                    Console.Write("Month: ");
                     int month = int.Parse(Console.ReadLine());
-                    Console.WriteLine("Customer ID: ");
+                    Console.Write("Customer ID: ");
                     long customerId = long.Parse(Console.ReadLine());
 
-                    _paymentService.GetPaymentAmount(customerId, new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero).AddMonths(1));
+                    Console.WriteLine(_paymentService.GetPaymentAmountOfPurchaseTransactions(customerId, 
+                        new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero), 
+                        new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero).AddMonths(1)));
                 }
                 catch (Exception e)
                 {
-                    _logger.LogInformation(e.Message);
+                    _logger.LogError(e.Message);
                 }
             }
         }

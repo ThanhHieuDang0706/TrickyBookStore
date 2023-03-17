@@ -8,17 +8,23 @@ namespace TrickyBookStore.Services.Subscriptions
 {
     public class SubscriptionService : ISubscriptionService
     {
-        private ICustomerService CustomerService;
-
-        public SubscriptionService(ICustomerService customerService)
+        public SubscriptionService()
         {
-            CustomerService = customerService;
+            
         }
 
         public IList<Subscription> GetSubscriptions(params int[] ids)
         {
-            List<Subscription> subscriptions = Store.Subscriptions.Data.Where(subscription => ids.Contains(subscription.Id)).ToList();
+            List<Subscription> subscriptions = Store.Subscriptions.Data
+                .Where(subscription => ids.Contains(subscription.Id))
+                .OrderByDescending(subscription => subscription.Priority)
+                .ToList();
             return subscriptions;
+        }
+
+        public Subscription GetFreeSubscription()
+        {
+            return Store.Subscriptions.Data.FirstOrDefault(subscription => subscription.SubscriptionType == SubscriptionTypes.Free);
         }
     }
 }
