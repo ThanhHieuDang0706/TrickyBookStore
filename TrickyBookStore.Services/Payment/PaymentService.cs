@@ -31,29 +31,37 @@ namespace TrickyBookStore.Services.Payment
 
             Customer customer = CustomerService.GetCustomerById(customerId);
             var bookIds = purchaseTransactions.Select(transaction => transaction.BookId);
-            var books = BookService.GetBooks(bookIds.ToArray()).ToLookup(book => book.Id, book => book);
+            var books = BookService.GetBooks(bookIds.ToArray()).ToDictionary(book => book.Id, book => book);
 
             IList<Subscription> subscriptions = SubscriptionService.GetSubscriptions(customer.SubscriptionIds.ToArray());
+            double totalPurchasePayment = CalculateTotalPurchasePayment(subscriptions, purchaseTransactions, books);
+            double subscriptionFees = subscriptions.Sum(subscription => subscription.Fee);
+            return totalPurchasePayment + subscriptionFees;
+        }
+
+        private double CalculateTotalPurchasePayment(IList<Subscription> subscriptions, IList<PurchaseTransaction> purchaseTransactions, Dictionary<long, Book> books)
+        {
             Dictionary<int, int> usedDiscountCount = new Dictionary<int, int>();
             foreach (var subscription in subscriptions)
             {
                 usedDiscountCount.Add(subscription.Id, 0);
             }
 
-            var categorySubscriptions = subscriptions
+            var categorySubscriptionsDictionary = subscriptions
                 .Where(subscription => subscription.SubscriptionType == SubscriptionTypes.CategoryAddicted)
-                .ToLookup(s => s.BookCategoryId, s => s);
-            var premiumSubscription = subscriptions.FirstOrDefault(subscription => subscription.SubscriptionType == SubscriptionTypes.Premium);
-            var paidSubscription = subscriptions.FirstOrDefault(subscription => subscription.SubscriptionType == SubscriptionTypes.Paid);
+                .ToDictionary(s => s.BookCategoryId, s => s);
+            var premiumSubscription = subscriptions.FirstOrDefault(subscription =>
+                subscription.SubscriptionType == SubscriptionTypes.Premium);
+            var paidSubscription =
+                subscriptions.FirstOrDefault(subscription => subscription.SubscriptionType == SubscriptionTypes.Paid);
             var freeSubscription = SubscriptionService.GetFreeSubscription();
-
             double totalPayment = 0d;
             foreach (var transaction in purchaseTransactions)
             {
-                Book book = books[transaction.BookId].First();
+                Book book = books[transaction.BookId];
                 if (book.IsOld)
                 {
-                    if (!categorySubscriptions.Contains(book.CategoryId) || premiumSubscription == null)
+                    if (!categorySubscriptionsDictionary.ContainsKey(book.CategoryId) || premiumSubscription == null)
                     {
                         if (paidSubscription != null)
                         {
@@ -68,7 +76,8 @@ namespace TrickyBookStore.Services.Payment
                 else
                 {
                     Subscription subscription =
-                        SelectAvailableSubscriptionForNewBook(subscriptions, categorySubscriptions, book, usedDiscountCount);
+                        SelectAvailableSubscriptionForNewBook(subscriptions, categorySubscriptionsDictionary, book,
+                            usedDiscountCount);
                     if (subscription.SubscriptionType == SubscriptionTypes.Free)
                     {
                         totalPayment += book.Price * subscription.PriceDetails["DiscountNewBook"];
@@ -80,16 +89,15 @@ namespace TrickyBookStore.Services.Payment
                     }
                 }
             }
-            double subscriptionFees = subscriptions.Sum(subscription => subscription.Fee);
-            return totalPayment + subscriptionFees;
+            return totalPayment;
         }
 
-        private Subscription SelectAvailableSubscriptionForNewBook(IList<Subscription> subscriptions, ILookup<int?, Subscription> categorySubscriptionLookup, Book book,
+        private Subscription SelectAvailableSubscriptionForNewBook(IList<Subscription> subscriptions, IDictionary<int?, Subscription> categorySubscriptionDictionary, Book book,
             Dictionary<int, int> usedDiscountCount)
         {
-            if (categorySubscriptionLookup.Contains(book.CategoryId))
+            if (categorySubscriptionDictionary.ContainsKey(book.CategoryId))
             {
-                Subscription subscription = categorySubscriptionLookup[book.CategoryId].First();
+                Subscription subscription = categorySubscriptionDictionary[book.CategoryId];
                 if (subscription.NumOfNewBookDiscount > usedDiscountCount[subscription.Id])
                 {
                     return subscription;
