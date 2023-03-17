@@ -40,6 +40,7 @@ namespace TrickyBookStore.Services.Store
                     { "DiscountOldBook", 0 },
                 },
                 NumOfNewBookDiscount = 3,
+                BookCategoryId = 4,
                 Fee = 75
             },
             new Subscription { Id = 5, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 3,
@@ -69,13 +70,6 @@ namespace TrickyBookStore.Services.Store
                 },
                 NumOfNewBookDiscount = 3,
                 BookCategoryId = 2,
-                Fee = 75
-            },
-            new Subscription { Id = 7, SubscriptionType = SubscriptionTypes.CategoryAddicted, Priority = 3,
-                PriceDetails = new Dictionary<string, double>
-                { { "DiscountNewBook", 0.75 }, { "DiscountOldBook", 0 } },
-                NumOfNewBookDiscount = 3,
-                BookCategoryId = 4,
                 Fee = 75
             },
         };

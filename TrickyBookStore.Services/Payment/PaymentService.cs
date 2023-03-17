@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using TrickyBookStore.Models;
 using TrickyBookStore.Services.Books;
 using TrickyBookStore.Services.Customers;
@@ -31,12 +30,11 @@ namespace TrickyBookStore.Services.Payment
                 PurchaseTransactionService.GetPurchaseTransactions(customerId, fromDate, toDate);
 
             Customer customer = CustomerService.GetCustomerById(customerId);
-
-            IList<Book> books = BookService.GetBooks(purchaseTransactions.Select(transaction => transaction.BookId).ToArray());
+            var bookIds = purchaseTransactions.Select(transaction => transaction.BookId);
+            var books = BookService.GetBooks(bookIds.ToArray()).ToLookup(book => book.Id, book => book);
 
             IList<Subscription> subscriptions = SubscriptionService.GetSubscriptions(customer.SubscriptionIds.ToArray());
             Dictionary<int, int> usedDiscountCount = new Dictionary<int, int>();
-
             foreach (var subscription in subscriptions)
             {
                 usedDiscountCount.Add(subscription.Id, 0);
@@ -50,8 +48,9 @@ namespace TrickyBookStore.Services.Payment
             var freeSubscription = SubscriptionService.GetFreeSubscription();
 
             double totalPayment = 0d;
-            foreach (var book in books)
+            foreach (var transaction in purchaseTransactions)
             {
+                Book book = books[transaction.BookId].First();
                 if (book.IsOld)
                 {
                     if (!categorySubscriptions.Contains(book.CategoryId) || premiumSubscription == null)
@@ -114,7 +113,6 @@ namespace TrickyBookStore.Services.Payment
                     return paidSubscription;
                 }
             }
-
             return SubscriptionService.GetFreeSubscription();
         }
 
