@@ -42,23 +42,30 @@ namespace TrickyBookStore.Services.Payment
         private double CalculateTotalPurchasePayment(IList<Subscription> subscriptions, IList<PurchaseTransaction> purchaseTransactions, Dictionary<long, Book> books)
         {
             Dictionary<int, int> usedDiscountCount = new Dictionary<int, int>();
+
+            Subscription freeSubscription = SubscriptionService.GetFreeSubscription();
             foreach (var subscription in subscriptions)
             {
                 usedDiscountCount.Add(subscription.Id, 0);
             }
+            usedDiscountCount.Add(freeSubscription.Id, 0);
 
-            
+            IDictionary<int?, Subscription>
+                categorySubscriptionDictionary = subscriptions
+                .Where(subscription => subscription.SubscriptionType == SubscriptionTypes.CategoryAddicted)
+                .ToDictionary(subscription => subscription.BookCategoryId, subscription => subscription);
+
             double totalPayment = 0d;
             foreach (var transaction in purchaseTransactions)
             {
                 Book book = books[transaction.BookId];
                 if (book.IsOld)
                 {
-                    totalPayment = CalculateOldBookPayment(book, subscriptions);
+                    totalPayment += CalculateOldBookPayment(book, subscriptions);
                 }
                 else
                 {
-                    Subscription subscription = SelectAvailableSubscriptionForNewBook(subscriptions, book, usedDiscountCount);
+                    Subscription subscription = SelectAvailableSubscriptionForNewBook(subscriptions, categorySubscriptionDictionary, book, usedDiscountCount);
                     totalPayment += book.Price * subscription.DiscountNewBook;
                     usedDiscountCount[subscription.Id]++;
                 }
@@ -88,13 +95,9 @@ namespace TrickyBookStore.Services.Payment
             return book.Price * freeSubscription.DiscountOldBook;
         }
 
-        private Subscription SelectAvailableSubscriptionForNewBook(IList<Subscription> subscriptions, Book book,
+        private Subscription SelectAvailableSubscriptionForNewBook(IList<Subscription> subscriptions, IDictionary<int?, Subscription> categorySubscriptionDictionary, Book book,
             Dictionary<int, int> usedDiscountCount)
         {
-            var categorySubscriptionDictionary = subscriptions
-                .Where(subscription => subscription.SubscriptionType == SubscriptionTypes.CategoryAddicted)
-                .ToDictionary(s => s.BookCategoryId, s => s);
-
             if (categorySubscriptionDictionary.ContainsKey(book.CategoryId))
             {
                 Subscription subscription = categorySubscriptionDictionary[book.CategoryId];
