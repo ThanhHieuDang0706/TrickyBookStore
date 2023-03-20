@@ -22,7 +22,7 @@ namespace TrickyBookStore.Services.PurchaseTransactions
                     transaction => 
                     transaction.CustomerId == customerId && 
                     transaction.CreatedDate >= fromDate && 
-                    transaction.CreatedDate <= toDate)
+                    transaction.CreatedDate < toDate)
                 .OrderBy(transaction => transaction.CreatedDate)
                 .ToList();
 
