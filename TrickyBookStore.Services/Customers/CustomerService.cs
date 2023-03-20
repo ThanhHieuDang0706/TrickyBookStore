@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using TrickyBookStore.Models;
-using TrickyBookStore.Services.Store;
 using TrickyBookStore.Services.Subscriptions;
 
 namespace TrickyBookStore.Services.Customers

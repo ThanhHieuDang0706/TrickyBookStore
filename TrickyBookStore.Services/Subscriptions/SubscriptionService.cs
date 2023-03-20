@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using TrickyBookStore.Models;
-using TrickyBookStore.Services.Customers;
 
 namespace TrickyBookStore.Services.Subscriptions
 {
