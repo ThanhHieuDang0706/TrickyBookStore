@@ -15,7 +15,6 @@ namespace TrickyBookStore.Services.Subscriptions
         {
             List<Subscription> subscriptions = Store.Subscriptions.Data
                 .Where(subscription => ids.Contains(subscription.Id))
-                .OrderByDescending(subscription => subscription.Priority)
                 .ToList();
             return subscriptions;
         }

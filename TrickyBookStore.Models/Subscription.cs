@@ -13,9 +13,7 @@ namespace TrickyBookStore.Models
         public double Fee { get; set; }
         public int? NumOfNewBookDiscount { get; set; } = 0;
         public Dictionary<string, double> PriceDetails { get; set; }
-
         public double DiscountNewBook => PriceDetails["DiscountNewBook"];
-
         public double DiscountOldBook => PriceDetails["DiscountOldBook"];
     }
 }
